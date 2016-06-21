@@ -1,0 +1,507 @@
+﻿<!--
+    The "faces-config" element is the root of the configuration information
+    hierarchy, and contains nested elements for all of the other configuration
+    settings.
+-->
+<!ELEMENT faces-config ((application | factory | component | converter | managed-bean | navigation-rule | referenced-bean | render-kit | lifecycle | validator | complex-type | composite-component | group | faces-config-extension )*)>
+
+<!--
+The faces-config-extension used to also contain an element "public" (<public>false</public>). 
+You will see that in Custom Control xsp-config files from 8.5 and 8.5.1, but it is not useful in the Notes/Domino environment, 
+and should not be added to your files. [It was left over from the Lotus Component Designer technology.]
+-->
+<!ELEMENT faces-config-extension ( namespace-uri | default-prefix? | designer-extension )>
+
+<!-- A suggested xmlns prefix to act as a synonym for the namespace-uri. -->
+<!ELEMENT default-prefix (#PCDATA)>
+
+<!--he namespace-uri must be known for each xsp-config file. It is usually defined with the optional default-prefix.
+It is normally present in the faces-config-extension. Otherwise the namespace-uri can be present in component-extensions. 
+In that case the first definition in the xsp-config file should declare the namespace-uri (or they should all have the same namespace-uri), 
+and any initial definitions without a namespace-uri will be ignored. -->
+<!ELEMENT namespace-uri (#PCDATA)>
+
+
+<!-- The component element describes a control tag, or abstract tag parent. 
+The definition format is similar to the component in the JSF faces-config format. 
+Extra details are usually present in the component-extension. Example:
+<br><br>
+&lt;component&gt;
+<br>        &lt;description&gt;A control that links to a different page ...&lt;/description&gt;
+<br>        &lt;display-name&gt;Link&lt;/display-name&gt;
+<br>        &lt;component-type&gt;com.ibm.xsp.OutputLink&lt;/component-type&gt;
+<br>        &lt;component-class&gt;com.ibm.xsp.component.xp.XspOutputLink&lt;/component-class&gt;
+<br>
+<br>        &lt;group-type-ref&gt;com.ibm.xsp.group.focus&lt;/group-type-ref&gt;
+<br>        &lt;group-type-ref&gt;com.ibm.xsp.group.i18n&lt;/group-type-ref&gt;
+<br>        &lt;group-type-ref&gt;com.ibm.xsp.group.text.escape&lt;/group-type-ref&gt;
+<br>
+<br>        &lt;property&gt;
+<br>          &lt;description&gt;Indicates the name of the frame ...&lt;/description&gt;
+<br>          &lt;display-name&gt;Target Frame&lt;/display-name&gt;
+<br>          &lt;property-name&gt;target&lt;/property-name&gt;
+<br>          &lt;property-class&gt;java.lang.String&lt;/property-class&gt;
+<br>        &lt;/property&gt;
+<br>        
+<br>        &lt;component-extension&gt;
+<br>            &lt;base-component-type&gt;com.ibm.xsp.UIOutputLink&lt;/base-component-type&gt;
+<br>            &lt;renderer-type&gt;com.ibm.xsp.LinkEx&lt;/renderer-type&gt;
+<br>            &lt;tag-name&gt;link&lt;/tag-name&gt;
+<br>            &lt;designer-extension&gt;
+<br>                &lt;category&gt;core&lt;/category&gt;
+<br>                &lt;selected-event&gt;onclick&lt;/selected-event&gt;
+<br>            &lt;/designer-extension&gt;   
+<br>        &lt;/component-extension&gt;
+<br>    &lt;/component&gt;  -->
+<!ELEMENT component (description* | display-name* | icon* | component-type | component-class | facet* | group-type-ref* | attribute* | property* | component-extension* | designer-extension*)>
+
+
+<!ELEMENT component-extension ( tag-name* | base-component-type* | component-family* | renderer-type* | namespace-uri* | default-prefix* | designer-extension* ) >
+
+<!-- The facet declaration is not yet used by Designer (as of 8.5.2). It was intended to indicate which facet names will be used by the current control, 
+so that the Designer tool might indicate that controls can be placed in that named area.
+However that functionality is currently achieved by placing an Editable Area control in the render-markup instead.
+A facet's facet-name is used in a page as a key of a value placed in the &lt;this.facets/&gt; map.-->
+<!ELEMENT facet (description*, display-name*, icon*, facet-name, facet-extension*)>
+<!ELEMENT facet-extension ANY>
+
+<!-- This references the component-type of this component's base or parent component.
+Any property defined on the parent or ancestors can be set on this component's tag. 
+It is usually present. When not present it defaults to the component definition for javax.faces.component.UIComponent.
+It can be used to build the component hierarchy, see definition inheritence trees for details. -->
+<!ELEMENT base-component-type (#PCDATA)>
+
+<!-- This is as in the faces-config format. 
+It must be present and it must extend javax.faces.component.UIComponent. 
+The component class must have a public constructor with no arguments, so that when the XPage is built to a generated .class file, that class can compile. -->
+<!ELEMENT component-class (#PCDATA)>
+
+<!-- This is as in the faces-config format. 
+The component-type is a unique identifier for a component or composite-component. 
+No two xsp-config files should contain components with the same component-type. 
+Other components will refer to a component by the component-type when defining it as their parent using the base-component-type. 
+-->
+<!ELEMENT component-type (#PCDATA)>
+
+<!-- The group-type-ref refers to group-type of some group. 
+The effect is to include the propertys of that group into the container definition.
+-->
+<!ELEMENT group-type-ref (#PCDATA)>
+
+<!-- The name of the XML tag for this definition, to be used in a page. It is usually present in a -extension element.
+This is necessary when defining an XML tag for a component , complex-type , validator or converter . For composite-components the composite-name is used instead.
+Tag names are not always required. For example a definition without a tag can be used to represent an abstract superclass or interface, from which other definitions can inherit. Also group definitions never correspond to an XML tag, so they do not have a tag-name.
+In the JSF reference implementation, the tag-name would be defined in a Tag Library but in XSP it is defined in the xsp-config file instead.
+The tag-names, and composite-names should be unique per namespace-uri . 
+For example, in the set of files with a common namespace you should not have a component with the same tag-name as a composite-component's composite-name .
+A tag-name should not be the named "this", as that would conflict with the use of "this" as a prefix for property containment tags. 
+The tag-name should not contain a dot (.), as it would be mis-identified as a render-kit tag. The recommendation is to only use the letters a-z and a-Z, to begin with a lower case letter and to capitalize the first letter of subsequent words in the tag name.
+-->
+<!ELEMENT tag-name (#PCDATA)>
+
+
+<!-- A composite-component's properties can be referenced from value bindings within the composite-file page.
+propertys can be categorized like so: 
+<ul>
+<li>The individual or item property types:<br>
+<ul>
+<li>Method binding.<br>
+See <a href="#method-binding-property-dd"><code>method-binding-property</code></a>. The value in a page will be one of: a string, a binding that can evaluate to a method on some managed-bean, or a <a href="XPages_configuration_file_format_page_4#complex-type-dtd"><code>complex-type</code></a> whose class extends <code>MethodBinding</code>, like the Simple Action complex-types.</li>
+<li>Primitive.<br>
+The value will be either a primitive (see <a href="#property-class-dd"><code>property-class</code></a>), or a binding that evaluates to a primitive.<br>
+</li>
+<li>Complex.<br>The value will be either a <code>complex-type</code> tag, or a binding that evaluates to an instance of a <a href="XPages_configuration_file_format_page_4#complex-class-dd"><code>complex-class</code></a>.<br>
+</li>
+<li>Generic object.<br>The value at runtime can be anything. The value in the page is constrained to be a String or a value binding.<br>
+</li>
+</ul>
+</li>
+<li>The container property types, which can contain multiple instances of an item type:<br>
+<ul>
+<li>Collection, containing one of the item types.<br>The value in a page will be a list containing any of the item types above. See the example at <a href="#collection-property-dd"><code>collection-property</code></a>.</li>
+<li>(Other container types have been proposed, maps and arrays, but they are not currently available)</li>
+</ul>
+</li>
+</ul>
+-->
+<!ELEMENT property (description*, display-name*, icon*, property-name, property-class, default-value?, suggested-value?, property-extension*)>
+
+<!-- 
+required*%,collection-property*%, 
+localizable*, property-item-class*, method-binding-property*, method-return-type*, method-param*, allow-non-binding*, allow-load-time-binding*, allow-run-time-binding*, property-add-method*, tag-attribute*, 
+default-property%, container-class% Also property and property-type.
+<br><br>
+* occurs in a property's property-extension 
+% occurs in a property-type's property-extension
+-->
+<!ELEMENT property-extension (required* | collection-property* | localizable* | property-item-class* | method-binding-property* | method-return-type* | method-param* | allow-non-binding* | allow-load-time-binding* | allow-run-time-binding* | property-add-method* | tag-attribute* | default-property* | container-class* | designer-extension*)>
+
+<!-- This is as in the faces-config format. Attributes are generally treated the same as properties.
+They can be represented by a &lt;this.propertyName/&gt; tag in the final page. The possible attribute values, which depend on the attribute-extension contents,
+are the same as the property values. It is recommended for components to use propertys instead of attributes.
+The difference between a property and an attribute is that a property has corresponding get and set methods on the definition class.
+Attributes are instead set using the UIComponent.getAttributes() map. Putting a value into the attributes map will call any set methods if they exist.
+The functional problems that may occur by incorrectly declaring a property as an attribute or an attribute as a property are around the handling of null values returned from a load-time value binding.
+An attribute null value will be handled by calling getAttributes().remove(propertyName), while a property null value will be handled by calling getAttributes().put(propertyName, null).
+Both of those methods will throw a runtime exception if the property is incorrectly declared as being an attribute or not.
+Attributes are not allowed on complex-type objects because they do not have an attributes map.
+-->
+<!ELEMENT attribute (description*, display-name*, icon*, attribute-name, attribute-class, default-value?, suggested-value?, attribute-extension*)>
+
+<!-- Expected contents: same as in property-extension. -->
+<!ELEMENT attribute-extension (required*,collection-property*, localizable*, property-item-class*, method-binding-property*, method-return-type*, method-param*, allow-non-binding*, allow-load-time-binding*, allow-run-time-binding*, property-add-method*, tag-attribute*, default-property*, container-class*, designer-extension)>
+
+<!-- 
+This can be present in a property's property-extension or an attribute-extension (not in a property-type's property-extension). It is a boolean that defaults to true.
+If true then the value of the property in a page can be a load time value binding. Load time value bindings are strings containing "${" and matching "}". They are converted to a value binding when the page is loaded, the value binding is then evaluated and the result is set as the value of the property.
+If false then load time value bindings are not supported for this property. If a string in the form of a load time binding is used, it will cause a validation error.
+-->
+<!ELEMENT allow-load-time-binding (#PCDATA)>
+
+<!--
+This can be present in a property's property-extension or an attribute-extension (not in a property-type's property-extension). It is a boolean that defaults to true.
+If true then the value of the property is not required to be a load time or runtime binding. The actual non-binding values allowed will depend on the property definition, but can include primitive values, or complex-type tags.
+If false then only load time or runtime value bindings are allowed as the value(s) of this property. Which of those are allowed will depend on how the property defines allow-load-time-binding and allow-run-time-binding.
+-->
+<!ELEMENT allow-non-binding (#PCDATA)>
+
+<!-- 
+This can be present in a property's property-extension or an attribute-extension (not in a property-type's property-extension). It defaults to true in a property-extension, and it defaults to false in an attribute-extension.
+If true then the value of the property in a page can be a runtime value binding. Runtime value bindings are strings containing "#{" and matching "}". They are converted to a javax.faces.el.ValueBinding when the page is loaded, and the value binding is set as the value of the property. The get* method for the property should then return the evaluated result of the value binding, to be used when rendering the page.
+If false then runtime value bindings are not supported for this property. If a string in the form of a runtime binding is used, it will cause a design-time validation error.
+-->
+<!ELEMENT allow-run-time-binding (#PCDATA)>
+
+<!-- 
+When collection-property is present more than one value is allowed for the property, property-type or attribute. It can be present in a property-extension or an attribute-extension. There are 3 types of collection-property:
+<ul>
+<li>using an add method.</li>
+<li>collection-property on composite-component or property-type definitions.</li>
+<li>collections of property-types.</li>
+</ul>
+too complex to put here. see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#collection-property
+-->
+<!ELEMENT collection-property (#PCDATA)>
+<!-- 
+The container-class is a Java class that can be present in a property-type's property-extension when collection-property is also present.
+It defines the container that the property-type instances will be placed in when they are stored in the parent composite-component or property-type.
+The collection-property container-class must implement java.util.Collection. If not present it defaults to java.util.ArrayList.
+-->
+<!ELEMENT container-class (#PCDATA)>
+<!-- 
+A boolean indicating that this property is localizable and that its value in the page file should usually be replaced by a localized value from a resource bundle. It is only applicable when the property-class is java.lang.String or java.lang.Object. It defaults to false. For more details see the Extracted Values section in the Localization Options article.
+-->
+<!ELEMENT localizable (#PCDATA)>
+
+<!-- 
+A boolean used to indicate that this property is a method binding. It will usually be present if the property-class is a javax.faces.el.MethodBinding. It defaults to false. See also method-return-type and method-param.<br>
+If a method binding property should appear in the Events tab (like the XPage root control's "beforeRenderResponse" method binding appears), then it should supply a subcategory extension.
+The most commonly used method binding property is the "action" property, available on Button and Event Handler controls, where the returned String is the name of the next page to navigate to.
+<br><br>
+see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#method-binding-property
+-->
+<!ELEMENT method-binding-property (#PCDATA)>
+
+<!-- 
+A method-param is defined in a property-extension when method-binding-property is present. It defines one of the parameters in the expected methods. The order of the method-params defines the expected ordering of the method's parameters.
+<br><br>
+see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#method-param
+-->
+<!ELEMENT method-param (method-param-name, method-param-class) >
+
+<!-- 
+The method-param-name is the name of a parameter to the method expected by this method binding property.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#method-param-name -->
+<!ELEMENT method-param-name (#PCDATA)>
+
+<!-- The method-param-class is the Java class of a parameter to the method expected by this method binding property 
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#method-param-class
+-->
+<!ELEMENT method-param-class (#PCDATA)>
+
+<!-- It references the Java class of the object to be returned from the method given as the value of this property in a page. 
+When the return type is a Java primitive or java.lang.String, then such values may be set as the value of the property in the XPage source. 
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#method-return-type
+-->
+<!ELEMENT method-return-type (#PCDATA)>
+
+<!-- property-add-method can be present in a property-extension or an attribute-extension when collection-property is true.<br>
+It references a method on the definition class, taking a parameter of the property-item-class type, that should be used to add individual items in the collection to the runtime object. 
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#property-add-method
+-->
+<!ELEMENT property-add-method (#PCDATA)>
+
+<!-- 
+The property-class is not the only thing that defines the type of value allowed for a property. See the property section for details of the different types of properties. The property-class cannot be javax.faces.component.UIComponent, or any subclass of UIComponent; if a named component is needed, use facets instead.
+The property-class will be one of:
+<br>
+<ul>
+<li>a Java class, like<br>
+	<div>&lt;property-class&gt;javax.faces.convert.Converter&lt;/property-class&gt;
+	</div>
+</li>
+<li>a primitive, like<br>
+	<div>&lt;property-class&gt;int&lt;/property-class&gt;
+	</div>
+	where the primitives are: char, byte, short, int, long, float, double, boolean, and string. <br>
+	Note, string is an alias for java.lang.String which is also treated as primitive.<br>
+	Generally only string, boolean, int and double are used.
+</li>
+<li>
+	object, like<br>
+	<div>
+		&lt;property-class&gt;object&lt;/property-class&gt;
+	</div>
+	is an alias for java.lang.Object and is special because such properties allow any runtime value, though the format in the XPage file must be a String or value binding. <br>
+	If you intended a value to be some Object but you accidentally define it as a String, then even when the computed value in the page returns an Object, the runtime ValueBinding will use the property's expected type (String), and will convert the value returned to a String, so the ValueBinding will always return a String instead of an Object. 
+</li>
+<li>an array, like<br>
+	<div>&lt;property-class&gt;javax.faces.el.MethodBinding[]&lt;/property-class&gt;
+	</div>
+	Note [] is used to indicate an array. When the class is an array, the value can only be computed in the XPage (with one exception).
+</li>
+</ul>
+
+
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#property-class 
+-->
+<!ELEMENT property-class (#PCDATA)>
+
+<!-- This can be present in a property-extension when collection-property is also present. The property-item-class is the Java class or interface that items in the collection must instantiate. If not present it defaults to java.lang.Object.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#property-item-class
+-->
+<!ELEMENT property-item-class (#PCDATA)>
+
+<!-- property-name is present in property and in property-type.
+In a property it defines the property's name, which will appear in a runtime page as either an XML attribute or in a <this.propertyName/> tag.
+In a property-type it both acts as the propertyName in the corresponding <this.propertyName/> tag, and it acts as the tag-name.
+The property-name must uniquely identify its property or property-type amongst the container definition's other propertys, attributes and property-types.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#property-name
+--> 
+<!ELEMENT property-name (#PCDATA)>
+
+<!-- 
+A boolean, indicating that this property must be present in the design-time XPage. It defaults to false if not set. Note, that the design-time value may be a computed value that returns null, so the runtime code should still handle null values even when the property is marked as required.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#required
+-->
+<!ELEMENT required (#PCDATA)>
+
+<!-- 
+This should not be used, but is present in some of the XPages runtime xsp-config files for legacy reasons. If false this indicates that this property will not correspond to an attribute or a &lt;this.propertyName/&gt; tag in a page file. The property or attribute declaration is then ignored. It is sometimes present if there is a get or set method for that property-name in the corresponding Java class.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#tag-attribute
+-->
+<!ELEMENT tag-attribute (#PCDATA)>
+
+
+<!-- 
+The designer-extension default-value is used at design-time when a control is dropped onto an XPage from the Controls palette, or when a complex-type instance is added using the "+" Add buttons in the All Properties tab of the XPages Editor. 
+For example, to create the following XPage:<br>
+1) Create a blank XPage and drag on a Repeat control from the Palette. <br>
+2) Select the XPage root control and in the All Properties tab, in the property named "properties" click the "+" Add button. <br>
+
+<br> there is much more!!! <br>
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#designer-extension+default-value
+-->
+<!ELEMENT default-value (#PCDATA)>
+
+<!ELEMENT complex-type (description*, display-name*, icon*, complex-id, complex-class, group-type-ref*, property*, complex-extension*)>
+<!ELEMENT complex-extension ANY>
+<!ELEMENT converter (description*, display-name*, icon*, (converter-id | converter-for-class), converter-class, group-type-ref*, attribute*, property*, converter-extension*)>
+<!ELEMENT converter-extension ANY>
+<!ELEMENT validator (description*, display-name*, icon*, validator-id, validator-class, group-type-ref*, attribute*, property*, validator-extension*)>
+<!ELEMENT validator-extension ANY>
+<!ELEMENT base-complex-id (#PCDATA)>
+<!ELEMENT base-converter-id (#PCDATA)>
+<!ELEMENT base-validator-id (#PCDATA)>
+<!ELEMENT complex-class (#PCDATA)>
+<!ELEMENT complex-id (#PCDATA)>
+<!ELEMENT converter-id (#PCDATA)>
+<!ELEMENT default-property (#PCDATA)>
+<!ELEMENT validator-id (#PCDATA)>
+<!ELEMENT composite-component (description* | display-name* | icon* | component-type | composite-name | composite-file | facet* | group-type-ref* | attribute* | property* | property-type* | composite-extension* )>
+<!ELEMENT composite-extension (designer-extension*)>
+<!ELEMENT property-type (description*, display-name*, icon*, property-name, property*, property-type*, property-extension*)>
+<!ELEMENT group (description*, display-name*, icon*, group-type, group-type-ref*, property*, group-extension*)>
+<!ELEMENT group-extension ANY>
+<!ELEMENT render-kit (description*, display-name*, icon*, render-kit-id?, render-kit-class?, renderer*, render-kit-extension?)>
+<!ELEMENT render-kit-extension ANY>
+<!ELEMENT renderer (description*, display-name*, icon*, component-family, renderer-type, renderer-class, facet*, attribute*, renderer-extension*)>
+<!ELEMENT renderer-extension ANY>
+<!ELEMENT base-render-kit-id (#PCDATA)>
+<!ELEMENT component-family (#PCDATA)>
+<!ELEMENT composite-file (#PCDATA)>
+<!ELEMENT composite-name (#PCDATA)>
+<!ELEMENT group-type (#PCDATA)>
+<!ELEMENT render-kit-alias (#PCDATA)>
+<!ELEMENT renderer-type (#PCDATA)>
+<!ELEMENT icon (small-icon?, large-icon?)>
+<!ELEMENT small-icon (#PCDATA)>
+<!ELEMENT large-icon (#PCDATA)>
+
+
+<!-- 
+Types:
+<ul>
+<li>component designer-extension </li>
+<li>complex-type designer-extension </li>
+<li>composite-component designer-extension </li>
+</ul>
+-->
+<!ELEMENT designer-extension (category | selected-event | event | visible | subcategory | in-palette | generate-id | render-markup | is-deprecated | editor | editor-parameter | styles-excluded | validation-formula)*>
+
+
+<!-- 
+Present in designer-extension in component-extension and in component-extension.
+The component category is a non-translated string. 
+It corresponds to the categories that appear in the Controls Palette of the XPages editor.
+The Designer editor does provide translations for two categories, "core" and "container". The component category is different from complex-type category and from property category. 
+<br><br>
+IBM verwendet category mehrfach!<br>
+<br>
+"component category"<br>
+<br>
+Present in designer-extension in component-extension and in component-extension.
+The component category is a non-translated string. It corresponds to the categories that appear in the Controls Palette of the XPages editor. The Designer editor does provide translations for two categories, "core" and "container". The component category is different from complex-type category and from property category.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_2#component+category
+<br><br><br>
+"property category"
+<br>
+The property category is used in the XPages Editor in the Properties view, in the All Properties tab, where all of the properties are listed grouped into categories.
+The property category extension is different from component category and from complex-type category.
+Normally the property category is specified as one of the runtime category values, which are translated by the infrastructure instead of directly in the xsp-config file
+
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#property+category
+-->
+<!ELEMENT category (#PCDATA)>
+
+<!-- 
+The property-name of the event property that is the most commonly used event for this control.
+When the designing user adds the control to an XPage and selects the Events view in the lower center panel, 
+the named event will be selected by default. The designing user can choose to select one of the other events instead,
+but it is best if the selected-event is the most commonly used event. When this is not configured, 
+by default the first event in the first visible events category will be selected. (When running Designer in English, that is often the "onclick" event, 
+since the Mouse category is the first events category, and the events are ordered alphabetically).
+-->
+<!ELEMENT selected-event (#PCDATA)>
+
+<!-- 
+Indicates that this property is an event that should appear in the XPages Editor's Events view, where users can configure client-side (browser) and server-side scripts and simple actions to be executed when the event occurs. Please note, it implies the property supports a client-side or browser event; a property that is only a server-side event is indicated using method-binding-property.
+For event properties you do not generally set the property value in the All Properties tab. For the XPages runtime controls provided by IBM, most support setting the property value to a single line of client JavaScript that will be written as an attribute value in the HTML output. Because it is a HTML attribute, the value should not contain new-line characters, double quotes or any non-attribute values. However if using Dojo Toolkit controls (using the "dojoType" property), then events configured in the All Properties tab will not generally be executed, as Dojo controls do not usually support event attributes. In that case the client JavaScript should be configured in the Events tab (which uses the Event Handler control), or using Dojo scripts (like type="dojo/method" scripts).
+-->
+<!ELEMENT event (#PCDATA)>
+
+<!-- Present in designer-extension in a component-extension or a composite-extension.
+This is different from the property visible extension. 
+It indicates that this control should not have a design-time visualization in the Design tab when added to an XPage.
+The control will still be selectable in the Outline view. An example is the Event Handler control, which is used by the Events view when you add an action to a control event.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_2#component+visible
+<br><br>
+IBM benutzt dieses ELEMENT mehrfach
+<br><br>
+The property visible extension is a JavaScript computation determining whether this property will be visible in the All Properties tab. Even where a property is not visible in the All Properties tab, it will still be possible to set that property in the XPage source, by typing in the property-name directly. This is similar to the validation-formula extension, which is used to determine whether a property value is considered valid. To avoid user confusion when properties appear and disappear in the All Properties tab, it may be better to use the validation-formula instead. The validation-formula section discusses the values available to the computation JavaScript; "value" refers to the current property value, and "otherProp" would refer to the primitive value of a different property on this control tag instance named "otherProp".
+The property visible extension is different to the component visible extension.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#property+visible
+-->
+<!ELEMENT visible (true|false)>
+
+
+<!-- 
+The subcategory extension is used with the event extension and with method-binding-propertys. In the XPages Editor, Events view, the different events are listed categorized by the type of event. So there is a "Mouse" category, including the events "onmouseover" and "onmouseout", and there is a "Key" category, including "onkeyup" and "onkeydown". 
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#subcategory
+-->
+<!ELEMENT subcategory (#PCDATA)>
+
+<!-- 
+Present in designer-extension in a component-extension or a component-extension.
+Indicates whether this control should appear in the main palette, or whether the application developing user must click on the "Other..." 
+option to find the control in the "Create Control" dialog. Users may override this extension by changing the preferences in File, Preferences, Domino Designer, Palette.
+The default value of this extension depends on whether the control is a composite-component or a regular component.
+The composite-components, corresponding to Custom Controls, appear in the palette by default, so you would set in-palette>false< to exclude them from the palette. The components, are only in the "Create Control" dialog by default, so you would set in-palette>true< to include them in the main palette.
+-->
+<!ELEMENT in-palette (true|false)>
+
+<!-- 
+Determines whether an "id" is present in the design-time Source generated when a control is dragged from the palette.
+The "id" corresponds to the "Name:" property in the main tab of the Properties view in the XPages Editor.
+This is used with controls that have a different behavior depending on whether an "id" is present or not.
+For example, if you drag an edit box and a panel onto an XPage the source will be like so (XPage snippet):
+<br><br>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<br>    &lt;xp:view xmlns:xp="http://www.ibm.com/xsp/core"&gt;
+<br> 	&lt;xp:inputText id="inputText1"&gt;&lt;/xp:inputText&gt;
+<br>	&lt;xp:panel&gt;&lt;/xp:panel&gt;
+&lt;/xp:view&gt;
+<br><br>
+The xp:inputText tag corresponding to the Edit Box is named "inputText1". The xp:panel (the Panel control) does not have an ID because it is configured with generate-id "false" . The Panel is configured like that because a Panel without an ID (and without a style/styleClass), will not output any DIV element to the browser, and will solely act as a server-side control, where it can be used to make data sources available to contained controls. That is the preferred default use of a panel, but the user may set an ID if they wish it to output a DIV element, for example if they wish to partial update the panel control when a button is clicked.
+The default value of this extension depends on whether the control is a composite-component or a regular component. The composite-components, corresponding to Custom Controls, do not have an ID by default, since they have the same behavior as a panel (outputting a DIV if an ID is present), so you would set generate-id>true< to ensure that an ID was generate by default (though the user could manually remove the ID). The components will generate an ID by default, so that the ID is already set if the user needs to configure a partial update of the control, or if they need to programmatically retrieve the control by ID, so you would set generate-id>false< to avoid generating an ID when the control added to the XPage from the palette.
+This option only controls the initial presence of the ID when dragged from the palette, users can always change the value of the ID, adding or removing it, or they can create control instances in the Source tab by typing in the control, or copy/pasting from existing control declarations.
+-->
+<!ELEMENT generate-id (true|false)>
+
+<!-- 
+Present in designer-extension in component-extension or a component-extension.
+Contains some escaped XPage markup used by the Design tab to provide the appearance of the control in the XPages Editor.
+A full discussion of render-markup is in the article Native and Custom Control Custom Visualization Best Practices.
+This corresponds to the "Design Definition" tab in the Custom Control editor.
+The value is expected to correspond a chunk of XPage sourcce that will be used by Designer to render the control at design time. Any valid XSP tags can be used, including references to images.
+Moreover, the markup can contain JavaScript snippets, wrapped within %lt;% and %&gt; pseudo tag. These snippets will be executed before the markup is rendered and can generate any markup.
+For example, the JavaScript code can evaluate property values, or loop against component properties. The JavaScript context gives access to the component's design time properties through the 'this' keyword. The JavaScript code cannot execute Java code, to prevent possible security problems (SPR#JQUL84YFLV).
+For example, for a custom control with a property named "header", if you paste this into the Design Definition tab (XPage snippet):
+-->
+<!ELEMENT render-markup (#PCDATA)>
+
+<!-- 
+Present in designer-extension in a component-extension or a component-extension.
+This is different from the property is-deprecated extension.
+Used to indicate that the control is obsolete and deprecated. When components marked as deprecated are used in an XPage, a warning appears in the Problems view, indicating that they should no longer be used. For example, if you go to the Source tab of an XPage and type in <xp:viewPager/>, and save the XPage, then the Problems view will contain the warning:
+The tag xp:viewPager is deprecated and no longer supported.
+(The xp:viewPager control was only used in the beta versions of 8.5.0, and has never been supported in a released version.)
+When marking a control as deprecated, you should also provide documentation explaining why it is not used, and how XPages should be reworked to avoid using the deprecated control. (The new xp:pager control should be used instead of the old xp:viewPager control.)
+-->
+<!ELEMENT is-deprecated (true|false)>
+
+
+<!-- 
+The editor is used in the XPages Editor, in the Properties view, All Properties tab, to provide assistance in entering the property value. For example, if you select the XPages root control, go to the All Properties tab and click into the "style" property, you'll see a button with tooltip "Launch external property editor", and if you click on the button, you'll see a "Style Editor" dialog where you can choose the styles for the control. That is a StylesEditor (full name is below). If you click into the "viewState" property, you'll see a drop-down combo box control where you can choose one of the means of saving the view state. That is a comboParameterEditor with an associated editor-parameter.
+
+Often the editor for a property is inferred from the property-class. For example, a boolean property will get a combo box with values "true" and "false". When the property-class corresponds to a complex-type tag, then the editor will allow you to create an instance of that complex-type tag. Or if the property-class corresponds to an abstract complex-type definition, then the editor will allow you to choose one of the tags that have that abstract definition as their base-complex-id.
+<br>...<br>
+<br><br> see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#editor
+-->
+<!ELEMENT editor (#PCDATA)>
+
+<!-- 
+The editor-parameter is a String value that may be used by the editor specified in the editor extension. <br>
+<div translate="0" class="wikicode"><pre>&lt;editor&gt;com.ibm.workplace.designer.property.editors.comboParameterEditor&lt;/editor&gt;<br></pre>
+<pre>&lt;editor-parameter&gt;<br></pre>
+<pre>  c|Cat<br></pre>
+<pre>  d|Dog<br></pre>
+<pre>  f|Fish<br></pre>
+<pre>&lt;/editor-parameter&gt;</pre>
+</div>
+<br><br> see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#editor-parameter
+-->
+<!ELEMENT editor-parameter (#PCDATA)>
+
+<!-- 
+This is used with the StyleClassEditor editor (full editor ID below), to prevent that editor showing options for style values that would not apply for the current control. 
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#styles-excluded
+-->
+<!ELEMENT styles-excluded (#PCDATA)>
+
+<!-- 
+The validation formula for a property on a Custom Control (composite-component) may be set in the Custom Control editor, in the Property Definition tab of the Properties view. 
+If you click the New Property button there, then on the right you can choose the Validation tab, where you can choose whether the value is required (setting the required element), 
+and you can enter some JavaScript computation determining whether the value in the XPage source is considered valid (setting the validation-formula extension).
+The validation-formula may also be set on components, not just on Custom Controls.
+The validation computation supplied for the property is executed at design-time when that property is present on an instance of the control in an XPage.
+The validation-formula is only applied when the value in the XPage is some primitive (String or int, boolean, double etc), not when the value is computed or is a complex-type tag.
+The computation can access the current value of the property under the name "value", so it can be used when determining if the value is valid.
+The value will be available as a String, boolean or double, depending on the property-class.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_3#validation-formula
+-->
+<!ELEMENT validation-formula (#PCDATA)>
+
+<!-- display name-->
+<!ELEMENT display-name    (#PCDATA)>
+
