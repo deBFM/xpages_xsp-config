@@ -304,38 +304,206 @@ For example, to create the following XPage:<br>
 -->
 <!ELEMENT default-value (#PCDATA)>
 
+<!-- 
+Is used twice by IBM (complex-type and complex type (as designer-extension))
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#complex-type
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#complex-type+designer-extension
+-->
 <!ELEMENT complex-type (description*, display-name*, icon*, complex-id, complex-class, group-type-ref*, property*, complex-extension*)>
+
+<!--
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#complex-extension
+-->
 <!ELEMENT complex-extension ANY>
+
+<!--
+A converter is a complex-type whose parent defaults to the abstract definition with class javax.faces.convert.Converter. 
+It is possible to choose a different converter as the parent by including a base-converter-id in the converter-extension.
+The converter definitions are declared differently from other complex-type definitions for historical reasons; the old faces-config.xml 
+file format allowed for converter and validator definitions, but it did not have the concept of a complex-type. The complex-type definitions were invented as an abstraction of converters, 
+validators, and any other objects in an XPage that didn't correspond to a control.
+
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#converter
+-->
 <!ELEMENT converter (description*, display-name*, icon*, (converter-id | converter-for-class), converter-class, group-type-ref*, attribute*, property*, converter-extension*)>
+
+<!-- 
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#converter-extension
+-->
 <!ELEMENT converter-extension ANY>
+
+<!--
+This is as in the faces-config file format, except that validator-extension was added, to allow metadata.
+Similar to the converter definition, a validator is a complex-type whose parent defaults to the abstract definition with class javax.faces.validator.Validator.
+It is possible to choose a different validator as the parent by including a base-validator-id in the validator-extension.
+The validator definitions are declared differently from other complex-type definitions for historical reasons; the old faces-config.xml file format allowed for converter and validator definitions, but it did not have the concept of a complex-type.
+The complex-type definitions were invented as an abstraction of converters, validators, and any other objects in an XPage that didn't correspond to a control.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#validator
+-->
 <!ELEMENT validator (description*, display-name*, icon*, validator-id, validator-class, group-type-ref*, attribute*, property*, validator-extension*)>
+
+<!--
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#validator-extension
+-->
 <!ELEMENT validator-extension ANY>
+
+<!--
+A complex-type's base-complex-id contains a reference to some other complex-type's complex-id. That complex-type is treated as this complex-type's parent.
+All propertys defined on the parent and ancestors are inherited by this complex-type and can be used on its tag in a page.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#base-complex-id
+-->
 <!ELEMENT base-complex-id (#PCDATA)>
+
+<!--
+A converter's base-converter-id contains a reference to some other converter's converter-id.
+That converter is treated as this converter's parent. All propertys defined on the parent and ancestors are inherited by this converter and can be used on its tag in a page.
+When the base-converter-id is not present the parent will default to the abstract definition for the class javax.faces.convert.Converter. 
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#base-converter-id
+-->
 <!ELEMENT base-converter-id (#PCDATA)>
+
+<!--
+A validator's base-validator-id contains a reference to some other validator's validator-id.
+That validator is treated as this validator's parent. All propertys defined on the parent and ancestors are inherited by this validator and can be used on its tag in a page.
+When the base-validator-id is not present the parent will default to the abstract definition for the class javax.faces.validator.Validator. See definition inheritance trees.
+Generally validators do not define a parent, as the implementations are usually encapsulated in a single class.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#base-validator-id
+-->
 <!ELEMENT base-validator-id (#PCDATA)>
+
+<!--
+complex-class is a complex-type's Java class. It should not implement javax.faces.component.UIComponent.
+Usually it should be non-abstract class with a public zero-argument constructor. An instance of the class will be created for every tag of this complex-type tag in the page.
+If the tag-name is absent, the class can be an interface or abstract class and there is no constructor requirement.
+The simplest implementations do not need to implement any interface. However, if it defines propertys then the decision must be made whether to support computed values for 
+those properties. If not supporting computed values, then each property should set allow-run-time-binding to false. If supporting computed values,
+then the complex-class should implement ValueBindingObject. Also, without explicit handling, computed values give serialization errors when persistence
+(high-availability mode) is enabled on the server, so it should implement the interfaces StateHolder and ComponentBindingObject and follow the XPages-specific templates for computed value serialization.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#complex-class
+-->
 <!ELEMENT complex-class (#PCDATA)>
+
+<!--
+An identifier for this complex-type that is unique across all the loaded configuration files. By convention complex-ids are prefixed like Java package names, to prevent conflicts with complex-types provided by other developers at other companies.
+The base-complex-id references complex-id, to build definition inheritance trees. They are also referenced in the label reference mechanism, used to reuse translated property names and descriptions in xsp-config files.
+An identifier for this complex-type that is unique across all the loaded configuration files. By convention complex-ids are prefixed like Java package names, to prevent conflicts with complex-types provided by other developers at other companies.
+The base-complex-id references complex-id, to build definition inheritance trees. They are also referenced in the label reference mechanism, used to reuse translated property names and descriptions in xsp-config files.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#complex-id
+-->
 <!ELEMENT complex-id (#PCDATA)>
+
+<!--
+An identifier for this converter that is unique across all the loaded configuration files. By convention converter-ids are prefixed like Java package names, to prevent conflicts with converters provided by other developers at other companies.
+The base-converter-id references converter-id, to build definition inheritance trees. They are also referenced in the label reference mechanism, used to reuse translated property names and descriptions in xsp-config files.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#converter-id
+-->
 <!ELEMENT converter-id (#PCDATA)>
+
+<!--
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#default-property
+-->
 <!ELEMENT default-property (#PCDATA)>
+
+<!--
+An identifier for this validator that is unique across all the loaded configuration files. By convention validator-ids are prefixed like Java package names, to prevent conflicts with validatorss provided by other developers at other companies.
+The base-validator-id references validator-id, to build definition inheritance trees. They are also referenced in the label reference mechanism, used to reuse translated property names and descriptions in xsp-config files.
+<br><br>see: https://www-10.lotus.com/ldd/ddwiki.nsf/dx/XPages_configuration_file_format_page_4#validator-id
+-->
 <!ELEMENT validator-id (#PCDATA)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT composite-component (description* | display-name* | icon* | component-type | composite-name | composite-file | facet* | group-type-ref* | attribute* | property* | property-type* | composite-extension* )>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT composite-extension (designer-extension*)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT property-type (description*, display-name*, icon*, property-name, property*, property-type*, property-extension*)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT group (description*, display-name*, icon*, group-type, group-type-ref*, property*, group-extension*)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT group-extension ANY>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT render-kit (description*, display-name*, icon*, render-kit-id?, render-kit-class?, renderer*, render-kit-extension?)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT render-kit-extension ANY>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT renderer (description*, display-name*, icon*, component-family, renderer-type, renderer-class, facet*, attribute*, renderer-extension*)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT renderer-extension ANY>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT base-render-kit-id (#PCDATA)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT component-family (#PCDATA)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT composite-file (#PCDATA)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT composite-name (#PCDATA)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT group-type (#PCDATA)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT render-kit-alias (#PCDATA)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT renderer-type (#PCDATA)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT icon (small-icon?, large-icon?)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT small-icon (#PCDATA)>
+
+<!--
+<br><br>see: 
+-->
 <!ELEMENT large-icon (#PCDATA)>
 
 
