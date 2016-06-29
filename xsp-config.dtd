@@ -745,6 +745,6 @@ The value will be available as a String, boolean or double, depending on the pro
 -->
 <!ELEMENT validation-formula (#PCDATA)>
 
-<!-- display name-->
-<!ELEMENT display-name    (#PCDATA)>
+<!ELEMENT display-name (#PCDATA)>
+<!ELEMENT description (#PCDATA)>
 
